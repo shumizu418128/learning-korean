@@ -8,6 +8,7 @@ import hgtk
 # 例: 쌍둥이（サンドゥンイ、双子） 濃音あり
 # 例: 회사（フェサ、会社） 合成母音あり
 # 例: 과일（クァイル、果物） 合成母音あり
+# 例: 외식（ウェシク、外食） 合成母音あり・例外あり
 
 input_text = input("Enter the text: ").strip()
 
@@ -23,6 +24,8 @@ vowel_read_dict = {
     "ㅠ": "yu",
     "ㅡ": "eu (u)",
     "ㅣ": "i",
+    "ㅔ": "e",  # 本来合成母音だが、合成母音辞書の中でこの文字が出てくるのでここにも書く
+    "ㅐ": "e",  # 本来合成母音だが、合成母音辞書の中でこの文字が出てくるのでここにも書く
 }
 
 # 子音
@@ -74,17 +77,51 @@ patchum_read_dict = {
 
 # 合成母音を分解
 diphthong_read_dict = {
-    "ㅘ": ["ㅗ", "ㅏ"],
-    "ㅙ": ["ㅗ", "ㅐ"],
-    "ㅚ": ["ㅗ", "ㅣ"],
-    "ㅝ": ["ㅜ", "ㅓ"],
-    "ㅞ": ["ㅜ", "ㅔ"],
-    "ㅟ": ["ㅜ", "ㅣ"],
-    "ㅢ": ["ㅡ", "ㅣ"],
-    "ㅐ": ["ㅏ", "ㅣ"],
-    "ㅒ": ["ㅑ", "ㅣ"],
-    "ㅔ": ["ㅓ", "ㅣ"],
-    "ㅖ": ["ㅕ", "ㅣ"],
+    "ㅐ": {
+        "symbol": ["ㅏ", "ㅣ"],
+        "reading": "e",
+    },
+    "ㅔ": {
+        "symbol": ["ㅓ", "ㅣ"],
+        "reading": "e",
+    },
+    "ㅒ": {
+        "symbol": ["ㅑ", "ㅣ"],
+        "reading": "ye",
+    },
+    "ㅖ": {
+        "symbol": ["ㅕ", "ㅣ"],
+        "reading": "ye",
+    },
+    "ㅘ": {
+        "symbol": ["ㅗ", "ㅏ"],
+        "reading": "wa",
+    },
+    "ㅝ": {
+        "symbol": ["ㅜ", "ㅓ"],
+        "reading": "wo",
+    },
+    "ㅞ": {
+        "symbol": ["ㅜ", "ㅔ"],
+        "reading": "we",
+    },
+    "ㅙ": {
+        "symbol": ["ㅗ", "ㅐ"],
+        "reading": "we",
+    },
+    "ㅚ": {
+        "symbol": ["ㅗ", "ㅣ"],
+        "reading": "we",
+        "note": "本来 o + i だが、例外としてweになる",
+    },
+    "ㅟ": {
+        "symbol": ["ㅜ", "ㅣ"],
+        "reading": "wi",
+    },
+    "ㅢ": {
+        "symbol": ["ㅡ", "ㅣ"],
+        "reading": "wi",
+    },
 }
 
 all_result = []
@@ -112,12 +149,11 @@ for char in input_text:
             "base": {
                 "symbol": strong_consonant[1],
                 "reading": consonant_read_dict[strong_consonant[1]],
-            }
+            },
         }
     else:
         consonant_info = {
             "symbol": consonant,
-            "note": "",
             "reading": consonant_read_dict[consonant],
         }
     result["components"]["子音"] = consonant_info
@@ -125,18 +161,23 @@ for char in input_text:
     # 母音の分析（ネスト構造）
     vowel_info = {
         "symbol": vowel,
-        "note": "合成母音" if diphthong_read_dict.get(vowel) else "",
     }
     # 合成母音の場合は2つの母音を分析
     diphthong = diphthong_read_dict.get(vowel)
     if diphthong:
         vowel_info["components"] = [
-            {"symbol": diphthong[0], "reading": vowel_read_dict[diphthong[0]]},
-            {"symbol": diphthong[1], "reading": vowel_read_dict[diphthong[1]]},
+            {
+                "symbol": diphthong["symbol"][0],
+                "reading": vowel_read_dict[diphthong["symbol"][0]],
+            },
+            {
+                "symbol": diphthong["symbol"][1],
+                "reading": vowel_read_dict[diphthong["symbol"][1]],
+            },
         ]
-        vowel_info["combined_reading"] = (
-            f"{vowel_read_dict[diphthong[0]]} + {vowel_read_dict[diphthong[1]]}"
-        )
+        vowel_info["combined_reading"] = diphthong["reading"]
+        vowel_info["note"] = "合成母音"
+        vowel_info["note"] += f" ※{diphthong.get('note', '')}"
     else:
         vowel_info["reading"] = vowel_read_dict[vowel]
     result["components"]["母音"] = vowel_info
@@ -145,7 +186,6 @@ for char in input_text:
     if patchum:
         patchum_info = {
             "symbol": patchum,
-            "note": "",
             "reading": patchum_read_dict.get(patchum, ""),
         }
         result["components"]["パッチム"] = patchum_info
