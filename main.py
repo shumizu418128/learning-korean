@@ -104,10 +104,12 @@ diphthong_read_dict = {
     "ㅞ": {
         "symbol": ["ㅜ", "ㅔ"],
         "reading": "we",
+        "note": "ㅔも合成母音",
     },
     "ㅙ": {
         "symbol": ["ㅗ", "ㅐ"],
         "reading": "we",
+        "note": "ㅐも合成母音",
     },
     "ㅚ": {
         "symbol": ["ㅗ", "ㅣ"],
