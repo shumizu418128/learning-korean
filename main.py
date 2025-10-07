@@ -17,7 +17,7 @@ input_text = input("Enter the text: ").strip()
 
 all_result = []
 
-for char in input_text:
+for i, char in enumerate(input_text):
     decomposed = hgtk.letter.decompose(char)
     decomposed_list = list(decomposed)
 
@@ -40,6 +40,25 @@ for char in input_text:
             "base": {
                 "symbol": strong_consonant[1],
                 "reading": config.consonant_read_dict[strong_consonant[1]],
+            },
+        }
+    elif consonant == "ㅇ" and i > 0:
+        # 直前のパッチムを取得
+        before_decomposed = hgtk.letter.decompose(input_text[i - 1])
+        before_decomposed_list = list(before_decomposed)
+        _, _, before_patchum = before_decomposed_list
+
+        # 直前のパッチムの読みを取得
+        reading = config.consonant_read_dict.get(before_patchum)
+        if reading is None:
+            reading = config.strong_consonant_read_dict.get(before_patchum)
+
+        consonant_info = {
+            "symbol": consonant,
+            "reading": "",
+            "before_patchum": {
+                "symbol": before_patchum,
+                "reading": reading,
             },
         }
     else:
