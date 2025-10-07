@@ -12,7 +12,7 @@ import config
 # 例: 과일（クァイル、果物） 合成母音あり
 # 例: 외식（ウェシク、外食） 合成母音あり・例外あり
 
-input_text = input("Enter the text: ").strip()
+input_text = input("Enter the text: ").strip().replace(" ", "")
 
 
 all_result = []
@@ -87,7 +87,8 @@ for i, char in enumerate(input_text):
         ]
         vowel_info["combined_reading"] = diphthong["reading"]
         vowel_info["note"] = "合成母音"
-        vowel_info["note"] += f" ※{diphthong.get('note', '')}"
+        if "note" in diphthong:
+            vowel_info["note"] += f" ※{diphthong.get('note', '')}"
     else:
         vowel_info["reading"] = config.vowel_read_dict[vowel]
     result["components"]["母音"] = vowel_info
